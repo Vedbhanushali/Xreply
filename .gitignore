@@ -1,0 +1,15 @@
+# Chrome Extension
+*.crx
+*.pem
+.DS_Store
+
+# Node modules (if you add any build tools)
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+
