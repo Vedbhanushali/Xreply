@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X Reply Auto Generator</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <h1>✨ X Reply Auto Generator</h1>
+
+  <div class="info-box">
+    <strong>💡 Tip:</strong> For best results, use <strong>Groq</strong> (free, fast, high quality). Get a free API key
+    at
+    <a href="https://console.groq.com" target="_blank">console.groq.com</a>
+  </div>
+
+  <div class="section">
+    <label for="apiProvider">AI Provider:</label>
+    <select id="apiProvider">
+      <option value="groq">Groq Free (Key Required)</option>
+      <option value="huggingface">Hugging Face Free (No Key)</option>
+      <option value="openai">OpenAI Compatible</option>
+      <option value="custom">Custom API</option>
+    </select>
+    <div class="help-text">Choose your AI provider. Groq offers the best quality and speed (free tier available).</div>
+  </div>
+
+  <!-- Groq Settings -->
+  <div class="section provider-section" id="groqSection">
+    <label for="groqModel">Groq Model:</label>
+    <select id="groqModel">
+      <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant (Recommended)</option>
+      <option value="llama-3.1-70b-versatile">Llama 3.1 70B Versatile</option>
+      <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+      <option value="gemma-7b-it">Gemma 7B</option>
+    </select>
+    <div class="help-text">Llama 3.1 8B is fast and produces great contextual replies.</div>
+  </div>
+
+  <!-- Hugging Face Settings -->
+  <div class="section provider-section" id="huggingfaceSection">
+    <label for="huggingFaceModel">Hugging Face Model:</label>
+    <select id="huggingFaceModel">
+      <option value="gpt2">GPT-2 (Default - Fast & Reliable)</option>
+      <option value="mistralai/Mistral-7B-Instruct-v0.2">Mistral 7B Instruct (Better Quality, Slower)</option>
+      <option value="meta-llama/Llama-2-7b-chat-hf">Llama 2 7B Chat</option>
+      <option value="microsoft/DialoGPT-medium">DialoGPT Medium</option>
+      <option value="google/flan-t5-large">Flan T5 Large</option>
+    </select>
+    <div class="help-text">GPT-2 is fastest and most reliable. Mistral 7B offers better quality but may be slower on
+      first use.</div>
+  </div>
+
+  <!-- OpenAI Settings -->
+  <div class="section provider-section" id="openaiSection">
+    <label for="openaiEndpoint">OpenAI Endpoint:</label>
+    <input type="text" id="openaiEndpoint" placeholder="https://api.openai.com/v1/chat/completions">
+    <div class="help-text">Enter your OpenAI-compatible API endpoint URL</div>
+  </div>
+
+  <!-- Custom API Settings -->
+  <div class="section provider-section" id="customSection">
+    <label for="customEndpoint">Custom API Endpoint:</label>
+    <input type="text" id="customEndpoint" placeholder="https://api.example.com/v1/generate">
+    <div class="help-text">Enter your custom API endpoint URL</div>
+  </div>
+
+  <div class="section">
+    <label for="apiKey">API Key:</label>
+    <input type="password" id="apiKey" placeholder="Enter your API key">
+    <div class="help-text" id="apiKeyHelp">
+      <span id="groqHelp" class="provider-help">Required for Groq. Get free key at <a href="https://console.groq.com"
+          target="_blank">console.groq.com</a></span>
+      <span id="huggingfaceHelp">Optional. Only needed for private models.
+        Get free key at <a href="https://huggingface.co/settings/tokens" target="_blank">huggingface.co</a></span>
+      <span id="openaiHelp">Required for OpenAI API</span>
+      <span id="customHelp">Required if your custom API needs
+        authentication</span>
+    </div>
+  </div>
+
+  <button id="saveBtn">Save Settings</button>
+
+  <div id="status" class="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
