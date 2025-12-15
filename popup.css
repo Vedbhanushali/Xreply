@@ -100,16 +100,14 @@ button:active {
 }
 
 .status.success {
-  background: #d4edda;
+  background: #171717;
   color: #f042e7;
-  border: 1px solid #c3e6cb;
   display: block;
 }
 
 .status.error {
-  background: #f8d7da;
+  background: #171717;
   color: #e43042;
-  border: 1px solid #f5c6cb;
   display: block;
 }
 

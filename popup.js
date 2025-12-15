@@ -1,5 +1,3 @@
-// Popup script for settings
-
 document.addEventListener('DOMContentLoaded', async () => {
   const apiProviderSelect = document.getElementById('apiProvider');
   const groqModelSelect = document.getElementById('groqModel');
@@ -9,18 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const apiKeyInput = document.getElementById('apiKey');
   const saveBtn = document.getElementById('saveBtn');
   const statusDiv = document.getElementById('status');
-
-  // Provider sections
-  const groqSection = document.getElementById('groqSection');
-  const huggingfaceSection = document.getElementById('huggingfaceSection');
-  const openaiSection = document.getElementById('openaiSection');
-  const customSection = document.getElementById('customSection');
-
-  // Help texts
-  const groqHelp = document.getElementById('groqHelp');
-  const huggingfaceHelp = document.getElementById('huggingfaceHelp');
-  const openaiHelp = document.getElementById('openaiHelp');
-  const customHelp = document.getElementById('customHelp');
+  const replyToneSelect = document.getElementById('replyTone');
 
   // Load saved settings
   const result = await chrome.storage.sync.get([
@@ -28,7 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     'apiKey',
     'apiEndpoint',
     'groqModel',
-    'huggingFaceModel'
+    'huggingFaceModel',
+    'replyTone'
   ]);
 
   // Set provider
@@ -59,6 +47,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else if (provider === 'custom') {
       customEndpointInput.value = result.apiEndpoint;
     }
+  }
+
+  // Set reply tone
+  if (result.replyTone) {
+    replyToneSelect.value = result.replyTone;
   }
 
   // Handle provider change
@@ -122,10 +115,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         settings.huggingFaceModel = huggingFaceModelSelect.value;
       }
 
+      // Save reply tone
+      settings.replyTone = replyToneSelect.value;
+
       await chrome.storage.sync.set(settings);
 
       showStatus('Settings saved successfully!', 'success');
-      
+
       // Clear status after 2 seconds
       setTimeout(() => {
         statusDiv.className = 'status';
