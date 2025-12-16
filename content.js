@@ -4,11 +4,14 @@
 const CONFIG = {
     buttonText: '✨ Auto Reply',
     buttonClass: 'x-auto-reply-btn',
+    customButtonText: '✏️ Custom',
+    customButtonClass: 'x-custom-reply-btn',
     loadingText: 'Generating...',
     errorText: 'Error',
     apiProvider: 'huggingface', // 'groq', 'huggingface', 'openai', 'custom' - Default to HuggingFace (no key needed)
     defaultGroqModel: 'llama-3.1-8b-instant',
-    defaultHuggingFaceModel: 'gpt2' // Using GPT-2 as default - more reliable for text generation
+    defaultHuggingFaceModel: 'gpt2', // Using GPT-2 as default - more reliable for text generation
+    defaultTone: 'casual'
 };
 
 // State
@@ -57,7 +60,7 @@ function addButtonsToTweets() {
 
     tweets.forEach(tweet => {
         // Skip if button already exists
-        if (tweet.querySelector(`.${CONFIG.buttonClass}`)) {
+        if (tweet.querySelector(`.${CONFIG.buttonClass}`) || tweet.querySelector(`.${CONFIG.customButtonClass}`)) {
             return;
         }
 
@@ -74,6 +77,7 @@ function addButtonsToTweets() {
 
 // Add button to a specific tweet
 function addButtonToTweet(tweet, actionBar) {
+    // Create auto reply button
     const button = document.createElement('button');
     button.className = CONFIG.buttonClass;
     button.textContent = CONFIG.buttonText;
@@ -85,28 +89,129 @@ function addButtonToTweet(tweet, actionBar) {
 
         if (isGenerating) return;
 
-        await handleAutoReply(tweet, button);
+        await handleAutoReply(tweet, button, null);
     });
 
-    // Insert button before the action bar or as first child
+    // Create custom description button
+    const customButton = document.createElement('button');
+    customButton.className = CONFIG.customButtonClass;
+    customButton.textContent = CONFIG.customButtonText;
+    customButton.type = 'button';
+
+    customButton.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        if (isGenerating) return;
+
+        await handleCustomDescription(tweet, customButton);
+    });
+
+    // Create a container for both buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'inline-flex';
+    buttonContainer.style.gap = '8px';
+    buttonContainer.style.marginRight = '8px';
+    buttonContainer.appendChild(button);
+    buttonContainer.appendChild(customButton);
+
+    // Insert button container before the action bar or as first child
     if (actionBar.parentNode) {
-        actionBar.parentNode.insertBefore(button, actionBar);
+        actionBar.parentNode.insertBefore(buttonContainer, actionBar);
     } else {
-        actionBar.appendChild(button);
+        actionBar.appendChild(buttonContainer);
     }
 }
 
+// Handle custom description modal
+async function handleCustomDescription(tweet, button) {
+    // Extract tweet content first
+    const tweetContext = extractTweetContext(tweet);
+    const tweetText = tweetContext.text || '';
+
+    // Create modal
+    const modal = createCustomDescriptionModal();
+    document.body.appendChild(modal);
+
+    // Show modal
+    modal.style.display = 'flex';
+
+    // Handle generate button
+    const generateBtn = modal.querySelector('#customGenerateBtn');
+    const cancelBtn = modal.querySelector('#customCancelBtn');
+    const textarea = modal.querySelector('#customDescription');
+
+    // Populate textarea with tweet content
+    if (tweetText) {
+        textarea.value = tweetText;
+    }
+
+    generateBtn.addEventListener('click', async () => {
+        const customText = textarea.value.trim();
+        if (!customText) {
+            alert('Please enter a custom description');
+            return;
+        }
+
+        // Close modal
+        modal.remove();
+
+        // Generate reply with custom description
+        await handleAutoReply(tweet, button, customText);
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        modal.remove();
+    });
+
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+
+    // Focus textarea
+    setTimeout(() => textarea.focus(), 100);
+}
+
+// Create custom description modal
+function createCustomDescriptionModal() {
+    const modal = document.createElement('div');
+    modal.className = 'x-custom-modal';
+    modal.innerHTML = `
+        <div class="x-custom-modal-content">
+            <h3>Custom Description</h3>
+            <p>Enter your custom prompt. This will be used instead of the tweet text to generate a reply.</p>
+            <textarea id="customDescription" placeholder="Enter your custom description or prompt here..." rows="5"></textarea>
+            <div class="x-custom-modal-buttons">
+                <button id="customCancelBtn" class="x-custom-cancel-btn">Cancel</button>
+                <button id="customGenerateBtn" class="x-custom-generate-btn">Generate Reply</button>
+            </div>
+        </div>
+    `;
+    return modal;
+}
+
 // Handle auto reply generation
-async function handleAutoReply(tweet, button) {
+async function handleAutoReply(tweet, button, customDescription = null) {
     try {
         isGenerating = true;
         button.textContent = CONFIG.loadingText;
         button.disabled = true;
 
-        // Extract tweet context (text, author, thread)
-        const tweetContext = extractTweetContext(tweet);
-        if (!tweetContext.text) {
-            throw new Error('Could not extract tweet text');
+        // Extract tweet context (text, author, thread) - only if not using custom description
+        let tweetContext;
+        tweetContext = extractTweetContext(tweet);
+        if (customDescription) {
+            // Use custom description instead of tweet text
+            tweetContext.text = tweetContext.text + '\n' + customDescription;
+            tweetContext.isCustom = true;
+        } else {
+            if (!tweetContext.text) {
+                throw new Error('Could not extract tweet text');
+            }
+            tweetContext.isCustom = false;
         }
 
         // Get API settings from storage
@@ -115,7 +220,8 @@ async function handleAutoReply(tweet, button) {
             'apiKey',
             'apiEndpoint',
             'groqModel',
-            'huggingFaceModel'
+            'huggingFaceModel',
+            'replyTone'
         ]);
 
         const apiProvider = result.apiProvider || CONFIG.apiProvider;
@@ -123,13 +229,16 @@ async function handleAutoReply(tweet, button) {
         const apiEndpoint = result.apiEndpoint || '';
         const groqModel = result.groqModel || CONFIG.defaultGroqModel;
         const huggingFaceModel = result.huggingFaceModel || CONFIG.defaultHuggingFaceModel;
+        const replyTone = result.replyTone || CONFIG.defaultTone;
 
         // Generate reply using AI
         console.log('Starting reply generation...', {
             provider: apiProvider,
             hasApiKey: !!apiKey,
             model: apiProvider === 'groq' ? groqModel : huggingFaceModel,
-            tweetText: tweetContext.text.substring(0, 50) + '...'
+            tone: replyTone,
+            isCustom: !!customDescription,
+            text: tweetContext.text.substring(0, 50) + '...'
         });
 
         const reply = await generateReply(tweetContext, {
@@ -137,7 +246,8 @@ async function handleAutoReply(tweet, button) {
             apiKey,
             apiEndpoint,
             groqModel,
-            huggingFaceModel
+            huggingFaceModel,
+            replyTone
         });
 
         console.log('Generated reply:', reply);
@@ -146,7 +256,7 @@ async function handleAutoReply(tweet, button) {
         await injectReply(reply, tweet);
 
         // Reset button
-        button.textContent = CONFIG.buttonText;
+        button.textContent = customDescription ? CONFIG.customButtonText : CONFIG.buttonText;
         button.disabled = false;
         isGenerating = false;
 
@@ -227,10 +337,10 @@ function extractTweetContext(tweet) {
 
 // Generate reply using AI API with improved prompts
 async function generateReply(tweetContext, apiConfig) {
-    const { provider, apiKey, apiEndpoint, groqModel, huggingFaceModel } = apiConfig;
+    const { provider, apiKey, apiEndpoint, groqModel, huggingFaceModel, replyTone } = apiConfig;
 
     // Build a contextual prompt
-    const prompt = buildContextualPrompt(tweetContext);
+    const prompt = buildContextualPrompt(tweetContext, replyTone);
 
     console.log('Generating reply with provider:', provider, 'Model:', provider === 'groq' ? groqModel : huggingFaceModel);
 
@@ -303,22 +413,29 @@ async function generateReply(tweetContext, apiConfig) {
 }
 
 // Build a contextual prompt for better replies
-function buildContextualPrompt(tweetContext) {
-    // Simpler prompt for GPT-2, more detailed for advanced models
-    const isSimpleModel = true; // We'll detect this based on model later if needed
+function buildContextualPrompt(tweetContext, tone = 'casual') {
+    // Tone descriptions
+    const toneDescriptions = {
+        casual: 'casual, friendly, and conversational',
+        professional: 'professional, polite, and business-appropriate',
+        humorous: 'funny, witty, and lighthearted',
+        formal: 'formal, respectful, and proper',
+        academic: 'academic, scholarly, and well-researched',
+        scientific: 'scientific, precise, and evidence-based',
+        troll: 'sarcastic, provocative, and intentionally inflammatory',
+        bully: 'aggressive, confrontational, and mean-spirited',
+        roasting: 'playfully critical, witty, and humorous while being sharp'
+    };
+
+    const toneDescription = toneDescriptions[tone] || toneDescriptions.casual;
+    const isCustom = tweetContext.isCustom || false;
 
     let prompt = '';
 
-    if (isSimpleModel) {
-        // Simpler prompt for GPT-2 and basic models
-        prompt = `Tweet: "${tweetContext.text}"
-
-Reply to this tweet with a thoughtful, relevant response:`;
-    } else {
-        // Detailed prompt for advanced models
-        prompt = `You are a helpful assistant that generates thoughtful, contextual Twitter replies. 
-
-Tweet to reply to: "${tweetContext.text}"`;
+    if (isCustom) {
+        // Custom description prompt
+        prompt = `You are a helpful assistant that generates Twitter replies in a ${toneDescription} style.
+                    Custom prompt/context: "${tweetContext.text}"`
 
         if (tweetContext.author) {
             prompt += `\nAuthor: ${tweetContext.author}`;
@@ -328,15 +445,36 @@ Tweet to reply to: "${tweetContext.text}"`;
             prompt += `\nThis is a reply in a conversation thread.`;
         }
 
-        prompt += `\n\nGenerate a unique, contextual, and engaging reply. The reply should:
-- Be relevant to the tweet's content
-- Be conversational and natural
-- Be concise (under 280 characters)
-- Show understanding of the tweet's context
-- Be unique and not generic
-- Match the tone of the original tweet
+        prompt += `Generate a unique, contextual, and engaging reply in a ${toneDescription} tone. The reply should:
+                    - Be relevant to the given context
+                    - Be written in a ${toneDescription} style
+                    - Be concise (under 280 characters)
+                    - Be unique and not generic
+                    - Match the ${tone} tone throughout
 
-Reply:`;
+                    Reply:`;
+    } else {
+        // Regular tweet reply prompt
+        prompt = `You are a helpful assistant that generates thoughtful, contextual Twitter replies in a ${toneDescription} style.
+                    Tweet to reply to: "${tweetContext.text}"`;
+
+        if (tweetContext.author) {
+            prompt += `\nAuthor: ${tweetContext.author}`;
+        }
+
+        if (tweetContext.isReply && tweetContext.replyTo) {
+            prompt += `\nThis is a reply in a conversation thread.`;
+        }
+
+        prompt += `\n\nGenerate a unique, contextual, and engaging reply in a ${toneDescription} tone. The reply should:
+                    - Be relevant to the tweet's content
+                    - Be written in a ${toneDescription} style
+                    - Be concise (under 280 characters)
+                    - Show understanding of the tweet's context
+                    - Be unique and not generic
+                    - Match the ${tone} tone throughout
+
+                    Reply:`;
     }
 
     return prompt;
@@ -646,7 +784,6 @@ function generateContextualFallback(tweetContext) {
 
     return fallbacks[Math.floor(Math.random() * fallbacks.length)];
 }
-
 
 // Inject reply into reply field - works with Draft.js (Twitter's editor)
 async function injectReply(replyText, tweet) {
