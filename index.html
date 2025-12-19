@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - X Reply Auto Generator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        h1 {
+            color: #7e03f8;
+            border-bottom: 2px solid #7e03f8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #5800b1;
+            margin-top: 30px;
+        }
+
+        ul {
+            margin: 10px 0;
+        }
+
+        a {
+            color: #7e03f8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .last-updated {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Privacy Policy for X Reply Auto Generator</h1>
+    <p class="last-updated"><strong>Last Updated:</strong> <span id="date"></span></p>
+
+    <h2>Overview</h2>
+    <p>X Reply Auto Generator ("we", "our", or "the extension") is committed to protecting your privacy. This privacy
+        policy explains how we handle information when you use our Chrome extension.</p>
+
+    <h2>Data Collection</h2>
+    <p><strong>We do not collect, store, or transmit any personal data.</strong> The extension operates entirely locally
+        on your device.</p>
+
+    <h2>Data Storage</h2>
+    <p>All settings and preferences are stored locally in your browser using Chrome's storage API:</p>
+    <ul>
+        <li><strong>API Keys</strong>: Stored locally using Chrome's <code>chrome.storage.sync</code> API</li>
+        <li><strong>Preferences</strong>: AI provider selection, model choices, reply tone settings</li>
+        <li><strong>Location</strong>: All data is stored on your device and never transmitted to us</li>
+    </ul>
+    <p>This data never leaves your device and is not accessible to us or any third parties (except the AI provider you
+        choose to use).</p>
+
+    <h2>External API Usage</h2>
+    <p>When you use the extension to generate replies:</p>
+    <ul>
+        <li><strong>Tweet Text</strong>: The text of the tweet you're replying to is sent to the AI provider you
+            configure (Groq, Hugging Face, OpenAI, or custom API)</li>
+        <li><strong>Direct Communication</strong>: This data is sent directly from your browser to the API provider you
+            choose</li>
+        <li><strong>No Interception</strong>: We do not intercept, store, or log this data</li>
+        <li><strong>API Keys</strong>: Your API keys are stored locally and used only to authenticate with the AI
+            provider you select</li>
+    </ul>
+
+    <h2>Third-Party Services</h2>
+    <p>The extension may use the following third-party services (only if you configure them):</p>
+    <ul>
+        <li><strong>Groq API</strong>: Used for AI-powered reply generation. <a
+                href="https://console.groq.com/docs/privacy" target="_blank">View Groq Privacy Policy</a></li>
+        <li><strong>Hugging Face API</strong>: Used for AI-powered reply generation. <a
+                href="https://huggingface.co/privacy" target="_blank">View Hugging Face Privacy Policy</a></li>
+        <li><strong>OpenAI API</strong>: Used if you configure an OpenAI-compatible endpoint. <a
+                href="https://openai.com/privacy" target="_blank">View OpenAI Privacy Policy</a></li>
+    </ul>
+    <p>We are not responsible for the privacy practices of these third-party services. Please review their privacy
+        policies before using their services.</p>
+
+    <h2>Permissions</h2>
+    <p>The extension requests the following permissions:</p>
+    <ul>
+        <li><strong>Storage</strong>: To save your settings locally</li>
+        <li><strong>Active Tab</strong>: To interact with Twitter/X pages</li>
+        <li><strong>Host Permissions</strong>:
+            <ul>
+                <li><code>https://*.twitter.com/*</code> and <code>https://*.x.com/*</code>: To inject the reply button
+                    and interact with Twitter/X</li>
+                <li><code>https://api.groq.com/*</code>: To use Groq AI API (if configured)</li>
+                <li><code>https://api-inference.huggingface.co/*</code>: To use Hugging Face AI API (if configured)</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Analytics and Tracking</h2>
+    <p>This extension does <strong>not</strong> use any analytics, tracking, or telemetry services. We do not collect
+        usage statistics, error reports, or any other data about how you use the extension.</p>
+
+    <h2>Data Sharing</h2>
+    <p>We do not share, sell, or rent your data to anyone. The only data transmission occurs when you choose to use an
+        AI provider, and in that case, the data (tweet text) is sent directly from your browser to the AI provider you
+        configured.</p>
+
+    <h2>Children's Privacy</h2>
+    <p>Our extension is not intended for children under 13 years of age. We do not knowingly collect personal
+        information from children under 13.</p>
+
+    <h2>Changes to This Privacy Policy</h2>
+    <p>We may update this privacy policy from time to time. We will notify you of any changes by updating the "Last
+        Updated" date at the top of this policy. You are advised to review this privacy policy periodically for any
+        changes.</p>
+
+    <h2>Your Rights</h2>
+    <p>You have the right to:</p>
+    <ul>
+        <li>Access your stored settings through the extension's popup</li>
+        <li>Delete your stored data by uninstalling the extension</li>
+        <li>Modify your settings at any time through the extension's popup</li>
+    </ul>
+
+    <h2>Contact Us</h2>
+    <p>If you have any questions about this privacy policy, please contact us through the Chrome Web Store listing or
+        via the extension's support channels.</p>
+
+    <hr>
+    <p><small>This privacy policy is effective as of the date listed above and applies to all users of the X Reply Auto
+            Generator Chrome extension.</small></p>
+
+    <script>
+        // Set current date
+        document.getElementById('date').textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    </script>
+</body>
+
+</html>
