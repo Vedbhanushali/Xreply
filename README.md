@@ -1,4 +1,4 @@
-f# X Reply Auto Generator - Chrome Extension
+# X Reply Auto Generator - Chrome Extension
 
 A Chrome extension that automatically generates AI-powered replies to tweets on X (formerly Twitter). Simply click the "✨ Auto Reply" button next to any tweet, and the extension will generate a contextual reply using AI and fill it in the reply field.
 
